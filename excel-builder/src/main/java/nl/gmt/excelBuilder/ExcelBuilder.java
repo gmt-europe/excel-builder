@@ -63,7 +63,12 @@ public class ExcelBuilder {
 
         for (Iterator iter = json.keys(); iter.hasNext(); ) {
             String key = (String)iter.next();
-            JSONObject values = json.getJSONObject(key);
+            Object value = json.get(key);
+            JSONObject values = null;
+            if (value instanceof JSONObject) {
+                values = (JSONObject)value;
+                value = null;
+            }
 
             Index index = Index.parse(key);
             if (index == null) {
@@ -81,131 +86,132 @@ public class ExcelBuilder {
             }
 
             StyleManager.Builder style = styleManager.newBuilder();
-            Object value = null;
             int columnSpan = -1;
             int rowSpan = -1;
             int height = -1;
             int width = -1;
 
-            for (Iterator valuesIter = values.keys(); valuesIter.hasNext(); ) {
-                String property = (String)valuesIter.next();
+            if (values != null) {
+                for (Iterator valuesIter = values.keys(); valuesIter.hasNext(); ) {
+                    String property = (String)valuesIter.next();
 
-                switch (property) {
-                    case "value":
-                        value = values.get(property);
-                        break;
+                    switch (property) {
+                        case "value":
+                            value = values.get(property);
+                            break;
 
-                    case "font":
-                        style.setFont(values.getString(property));
-                        break;
+                        case "font":
+                            style.setFont(values.getString(property));
+                            break;
 
-                    case "size":
-                    case "fontSize":
-                        style.setFontSize((short)values.getInt(property));
-                        break;
+                        case "size":
+                        case "fontSize":
+                            style.setFontSize((short)values.getInt(property));
+                            break;
 
-                    case "bold":
-                        style.setBold(values.getBoolean(property));
-                        break;
+                        case "bold":
+                            style.setBold(values.getBoolean(property));
+                            break;
 
-                    case "italic":
-                        style.setItalic(values.getBoolean(property));
-                        break;
+                        case "italic":
+                            style.setItalic(values.getBoolean(property));
+                            break;
 
-                    case "strikeout":
-                        style.setStrikeout(values.getBoolean(property));
-                        break;
+                        case "strikeout":
+                            style.setStrikeout(values.getBoolean(property));
+                            break;
 
-                    case "underline":
-                        StyleUnderline underline = StyleUnderline.findByCode(values.getString(property));
-                        if (underline == null) {
-                            System.err.println("Cannot parse underline '" + values.getString(property) + "'");
-                        } else {
-                            style.setUnderline(underline);
-                        }
-                        break;
+                        case "underline":
+                            StyleUnderline underline = StyleUnderline.findByCode(values.getString(property));
+                            if (underline == null) {
+                                System.err.println("Cannot parse underline '" + values.getString(property) + "'");
+                            } else {
+                                style.setUnderline(underline);
+                            }
+                            break;
 
-                    case "align":
-                    case "alignment":
-                        StyleAlignment alignment = StyleAlignment.findByCode(values.getString(property));
-                        if (alignment == null) {
-                            System.err.println("Cannot parse alignment '" + values.getString(property) + "'");
-                        } else {
-                            style.setAlignment(alignment);
-                        }
-                        break;
+                        case "align":
+                        case "alignment":
+                            StyleAlignment alignment = StyleAlignment.findByCode(values.getString(property));
+                            if (alignment == null) {
+                                System.err.println("Cannot parse alignment '" + values.getString(property) + "'");
+                            } else {
+                                style.setAlignment(alignment);
+                            }
+                            break;
 
-                    case "valign":
-                    case "verticalAlignment":
-                        StyleVerticalAlignment verticalAlignment = StyleVerticalAlignment.findByCode(values.getString(property));
-                        if (verticalAlignment == null) {
-                            System.err.println("Cannot parse vertical alignment '" + values.getString(property) + "'");
-                        } else {
-                            style.setVerticalAlignment(verticalAlignment);
-                        }
-                        break;
+                        case "valign":
+                        case "verticalAlignment":
+                            StyleVerticalAlignment verticalAlignment = StyleVerticalAlignment.findByCode(values.getString(property));
+                            if (verticalAlignment == null) {
+                                System.err.println("Cannot parse vertical alignment '" + values.getString(property) + "'");
+                            } else {
+                                style.setVerticalAlignment(verticalAlignment);
+                            }
+                            break;
 
-                    case "fill":
-                        StyleFill fill = StyleFill.findByCode(values.getString(property));
-                        if (fill == null) {
-                            System.err.println("Cannot parse fill '" + values.getString(property) + "'");
-                        } else {
-                            style.setFill(fill);
-                        }
-                        break;
+                        case "fill":
+                            StyleFill fill = StyleFill.findByCode(values.getString(property));
+                            if (fill == null) {
+                                System.err.println("Cannot parse fill '" + values.getString(property) + "'");
+                            } else {
+                                style.setFill(fill);
+                            }
+                            break;
 
-                    case "border":
-                        StyleBorder border = StyleBorder.findByCode(values.getString(property));
-                        if (border == null) {
-                            System.err.println("Cannot parse border '" + values.getString(property) + "'");
-                        } else {
-                            style.setBorder(border);
-                        }
-                        break;
+                        case "border":
+                            StyleBorder border = StyleBorder.findByCode(values.getString(property));
+                            if (border == null) {
+                                System.err.println("Cannot parse border '" + values.getString(property) + "'");
+                            } else {
+                                style.setBorder(border);
+                            }
+                            break;
 
-                    case "fontColor":
-                    case "foreColor":
-                    case "textColor":
-                        StyleColor fontColor = StyleColor.findByCode(values.getString(property));
-                        if (fontColor == null) {
-                            System.err.println("Cannot parse fontColor '" + values.getString(property) + "'");
-                        } else {
-                            style.setFontColor(fontColor);
-                        }
-                        break;
+                        case "fontColor":
+                        case "foreColor":
+                        case "textColor":
+                            StyleColor fontColor = StyleColor.findByCode(values.getString(property));
+                            if (fontColor == null) {
+                                System.err.println("Cannot parse fontColor '" + values.getString(property) + "'");
+                            } else {
+                                style.setFontColor(fontColor);
+                            }
+                            break;
 
-                    case "color":
-                    case "backColor":
-                        StyleColor color = StyleColor.findByCode(values.getString(property));
-                        if (color == null) {
-                            System.err.println("Cannot parse color '" + values.getString(property) + "'");
-                        } else {
-                            style.setColor(color);
-                        }
-                        break;
+                        case "color":
+                        case "backColor":
+                            StyleColor color = StyleColor.findByCode(values.getString(property));
+                            if (color == null) {
+                                System.err.println("Cannot parse color '" + values.getString(property) + "'");
+                            } else {
+                                style.setColor(color);
+                            }
+                            break;
 
-                    case "height":
-                        height = values.getInt(property);
-                        break;
+                        case "height":
+                            height = values.getInt(property);
+                            break;
 
-                    case "width":
-                        width = values.getInt(property);
-                        break;
+                        case "width":
+                            width = values.getInt(property);
+                            break;
 
-                    case "span":
-                    case "colspan":
-                    case "columnSpan":
-                        columnSpan = values.getInt(property);
-                        break;
+                        case "span":
+                        case "colspan":
+                        case "columnSpan":
+                            columnSpan = values.getInt(property);
+                            break;
 
-                    case "vspan":
-                    case "rowspan":
-                    case "rowSpan":
-                        rowSpan = values.getInt(property);
-                        break;
+                        case "vspan":
+                        case "rowspan":
+                        case "rowSpan":
+                            rowSpan = values.getInt(property);
+                            break;
 
-                    default:
-                        System.err.println("Cannot process property '" + property + "'");
+                        default:
+                            System.err.println("Cannot process property '" + property + "'");
+                    }
                 }
             }
 
